@@ -6,6 +6,7 @@ import { DatabaseModule } from './database/database.module';
 import { CacheConfigModule } from './cache/cache.module';
 import { MailModule } from './mail/mail.module';
 import { SmsModule } from './sms/sms.module';
+import { HealthModule } from './health/health.module';
 import { validateEnv } from './config/env.config';
 
 @Module({
@@ -19,6 +20,7 @@ import { validateEnv } from './config/env.config';
     CacheConfigModule,
     MailModule,
     SmsModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -3,6 +3,7 @@ import { MailerModule, MailerOptions } from "@nestjs-modules/mailer";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { MailService } from "./mail.service";
 import mailConfig from "../config/mail.config";
+import { LoggingModule } from "../logging/logging.module";
 
 @Global()
 @Module({
@@ -19,6 +20,7 @@ import mailConfig from "../config/mail.config";
         return config;
       },
     }),
+    LoggingModule,
   ],
   providers: [MailService],
   exports: [MailService],

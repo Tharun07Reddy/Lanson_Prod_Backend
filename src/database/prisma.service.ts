@@ -1,5 +1,5 @@
 // eslint-disable-next-line prettier/prettier
-import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
+import { Injectable, OnModuleInit, OnModuleDestroy, Logger, INestApplication } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 
 // Define the query event type
@@ -60,6 +60,14 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     await this.$disconnect();
   }
 
+  async enableShutdownHooks(app: INestApplication) {
+    // Use process.on instead of Prisma's $on for beforeExit
+    process.on('beforeExit', () => {
+      this.logger.log('Prisma is shutting down, closing application...');
+      void app.close();
+    });
+  }
+
   private async connectWithRetry(): Promise<void> {
     try {
       this.logger.log('Connecting to database...');
@@ -70,12 +78,12 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       
       if (this.connectionAttempts >= this.maxConnectionAttempts) {
         this.logger.error(`Failed to connect to database after ${this.maxConnectionAttempts} attempts`);
-        this.logger.error(error);
+        this.logger.error(error instanceof Error ? error.message : 'Unknown error');
         process.exit(1); // Exit the application if database connection fails
       }
       
       this.logger.warn(`Database connection attempt ${this.connectionAttempts} failed. Retrying in ${this.connectionRetryDelay / 1000}s...`);
-      this.logger.debug(error);
+      this.logger.debug(error instanceof Error ? error.message : 'Unknown error');
       
       // Wait before retrying
       await new Promise(resolve => setTimeout(resolve, this.connectionRetryDelay));

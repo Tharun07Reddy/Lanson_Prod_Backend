@@ -1,13 +1,8 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider        = "prisma-client-js"
-  // Enable better query performance with MongoDB
- // previewFeatures = ["mongoDb", "fullTextSearch", "fullTextIndex"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -15,52 +10,232 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Note: This is just a schema configuration example.
-// No actual models are defined as per your requirements.
-// When you're ready to add models, you can use this structure
-// with proper MongoDB indexing.
+// Message status enum
+enum MessageStatus {
+  PENDING
+  SENT
+  DELIVERED
+  FAILED
+  BOUNCED
+  REJECTED
+  OPENED // For emails only
+  CLICKED // For emails only
+}
 
-// Example of how you would define models with MongoDB indexes:
-//
-// model Product {
-//   id          String   @id @default(auto()) @map("_id") @db.ObjectId
-//   name        String
-//   description String?
-//   price       Float
-//   stock       Int      @default(0)
-//   categories  String[] @db.ObjectId
-//   createdAt   DateTime @default(now())
-//   updatedAt   DateTime @updatedAt
-//
-//   // MongoDB indexes for performance
-//   @@index([name])
-//   @@index([price])
-//   @@index([stock])
-//   @@index([categories])
-//   @@fulltext([name, description]) // Full-text search index
-// }
-//
-// model Category {
-//   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-//   name      String   @unique
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-//
-//   @@index([name])
-// }
-//
-// model Order {
-//   id         String    @id @default(auto()) @map("_id") @db.ObjectId
-//   userId     String    @db.ObjectId
-//   items      Json[]
-//   totalPrice Float
-//   status     String
-//   createdAt  DateTime  @default(now())
-//   updatedAt  DateTime  @updatedAt
-//   paidAt     DateTime?
-//
-//   // MongoDB indexes for performance
-//   @@index([userId])
-//   @@index([status])
-//   @@index([createdAt])
-// }
+// User status enum
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+}
+
+// Authentication provider enum
+enum AuthProvider {
+  LOCAL
+  GOOGLE
+  FACEBOOK
+  APPLE
+  TWITTER
+}
+
+// Email log model
+model EmailLog {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  messageId     String? // External ID from email provider
+  from          String // Sender email address
+  to            String[] // Recipient email addresses
+  cc            String[] // CC recipients
+  bcc           String[] // BCC recipients
+  subject       String // Email subject
+  body          String // Email body content (can be HTML)
+  templateId    String? // ID of the template used, if any
+  templateData  Json? // Data passed to the template
+  status        MessageStatus // Current status of the email
+  statusDetails String? // Additional status information
+  provider      String // Email service provider (e.g., "nodemailer", "sendgrid")
+  metadata      Json? // Additional metadata
+  tags          String[] // Tags for categorizing emails
+  attachments   Json? // Information about attachments
+  ipAddress     String? // IP address of the sender
+  userAgent     String? // User agent of the sender
+  retryCount    Int           @default(0) // Number of retry attempts
+  errorMessage  String? // Error message if failed
+  createdAt     DateTime      @default(now()) // When the log was created
+  updatedAt     DateTime      @updatedAt // When the log was last updated
+  sentAt        DateTime? // When the email was sent
+  deliveredAt   DateTime? // When the email was delivered
+  openedAt      DateTime? // When the email was opened
+  clickedAt     DateTime? // When links in the email were clicked
+}
+
+// SMS log model
+model SmsLog {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  messageId     String? // External ID from SMS provider
+  from          String // Sender phone number or ID
+  to            String // Recipient phone number
+  body          String // SMS content
+  templateId    String? // ID of the template used, if any
+  templateData  Json? // Data passed to the template
+  status        MessageStatus // Current status of the SMS
+  statusDetails String? // Additional status information
+  provider      String // SMS service provider (e.g., "twilio", "nexmo")
+  metadata      Json? // Additional metadata
+  tags          String[] // Tags for categorizing SMS
+  countryCode   String? // Country code of recipient
+  retryCount    Int           @default(0) // Number of retry attempts
+  errorMessage  String? // Error message if failed
+  segmentCount  Int? // Number of segments the SMS was split into
+  price         Float? // Cost of sending the SMS
+  createdAt     DateTime      @default(now()) // When the log was created
+  updatedAt     DateTime      @updatedAt // When the log was last updated
+  sentAt        DateTime? // When the SMS was sent
+  deliveredAt   DateTime? // When the SMS was delivered
+}
+
+// User model
+model User {
+  id                String       @id @default(auto()) @map("_id") @db.ObjectId
+  email             String       @unique
+  phone             String?
+  username          String?
+  password          String?
+  firstName         String?
+  lastName          String?
+  status            UserStatus   @default(PENDING_VERIFICATION)
+  emailVerified     Boolean      @default(false)
+  phoneVerified     Boolean      @default(false)
+  authProvider      AuthProvider @default(LOCAL)
+  authProviderId    String?
+  profilePicture    String?
+  lastLoginAt       DateTime?
+  passwordChangedAt DateTime?
+  metadata          Json?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  // Relations
+  sessions      UserSession[]
+  roles         UserRole[]
+  refreshTokens RefreshToken[]
+
+  AuthEvent AuthEvent[]
+}
+
+// Role model
+model Role {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String   @unique
+  description String?
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  users       UserRole[]
+  permissions RolePermission[]
+}
+
+// Permission model
+model Permission {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String   @unique
+  description String?
+  resource    String
+  action      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  roles RolePermission[]
+}
+
+// User-Role relationship
+model UserRole {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  roleId    String   @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
+}
+
+// Role-Permission relationship
+model RolePermission {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  roleId       String   @db.ObjectId
+  permissionId String   @db.ObjectId
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+}
+
+// User Session model for tracking active sessions
+model UserSession {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String   @db.ObjectId
+  token        String   @unique
+  deviceId     String?
+  deviceType   String?
+  deviceName   String?
+  ipAddress    String?
+  userAgent    String?
+  location     String?
+  expiresAt    DateTime
+  lastActiveAt DateTime @default(now())
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Refresh Token model for maintaining long-lived sessions
+model RefreshToken {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String   @db.ObjectId
+  token           String   @unique
+  deviceId        String?
+  deviceType      String?
+  expiresAt       DateTime
+  isRevoked       Boolean  @default(false)
+  replacedByToken String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Auth Event model for tracking authentication events
+model AuthEvent {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  eventType     String
+  userId        String?  @db.ObjectId
+  email         String?
+  phone         String?
+  deviceId      String?
+  deviceType    String?
+  ipAddress     String?
+  userAgent     String?
+  location      String?
+  success       Boolean?
+  failureReason String?
+  metadata      Json?
+  createdAt     DateTime @default(now())
+
+  // Optional relation to user
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+}

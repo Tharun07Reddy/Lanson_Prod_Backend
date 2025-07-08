@@ -1,0 +1,66 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider        = "prisma-client-js"
+  // Enable better query performance with MongoDB
+ // previewFeatures = ["mongoDb", "fullTextSearch", "fullTextIndex"]
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// Note: This is just a schema configuration example.
+// No actual models are defined as per your requirements.
+// When you're ready to add models, you can use this structure
+// with proper MongoDB indexing.
+
+// Example of how you would define models with MongoDB indexes:
+//
+// model Product {
+//   id          String   @id @default(auto()) @map("_id") @db.ObjectId
+//   name        String
+//   description String?
+//   price       Float
+//   stock       Int      @default(0)
+//   categories  String[] @db.ObjectId
+//   createdAt   DateTime @default(now())
+//   updatedAt   DateTime @updatedAt
+//
+//   // MongoDB indexes for performance
+//   @@index([name])
+//   @@index([price])
+//   @@index([stock])
+//   @@index([categories])
+//   @@fulltext([name, description]) // Full-text search index
+// }
+//
+// model Category {
+//   id        String   @id @default(auto()) @map("_id") @db.ObjectId
+//   name      String   @unique
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+//
+//   @@index([name])
+// }
+//
+// model Order {
+//   id         String    @id @default(auto()) @map("_id") @db.ObjectId
+//   userId     String    @db.ObjectId
+//   items      Json[]
+//   totalPrice Float
+//   status     String
+//   createdAt  DateTime  @default(now())
+//   updatedAt  DateTime  @updatedAt
+//   paidAt     DateTime?
+//
+//   // MongoDB indexes for performance
+//   @@index([userId])
+//   @@index([status])
+//   @@index([createdAt])
+// }

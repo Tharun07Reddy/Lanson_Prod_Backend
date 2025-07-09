@@ -6,6 +6,7 @@ import { Request } from 'express';
 // Instead of augmenting express, define a custom interface
 export interface RequestWithId extends Request {
   id: string;
+  requestId: string;
 }
 
 @Injectable()

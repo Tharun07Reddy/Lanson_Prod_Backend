@@ -31,6 +31,7 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-argument': 'warn',
       'linebreak-style': 0, // Allow any line ending style
       'prettier/prettier': 'off',
+      
     },
   },
 );

@@ -58,12 +58,12 @@ async function bootstrap() {
     );
 
     // Start the server
-    const port = configService.get<number>("PORT", 3000);
+    const port = process.env.PORT || configService.get<number>("PORT", 3000);
     const host = configService.get<string>("HOST", "0.0.0.0");
 
     await app.listen(port, host);
     logger.log(`Application is running on: ${await app.getUrl()}`);
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof Error) {
       logger.error(`Error starting application: ${error.message}`, error.stack);
     } else {

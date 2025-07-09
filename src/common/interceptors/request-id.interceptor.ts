@@ -18,6 +18,7 @@ export class RequestIdInterceptor implements NestInterceptor {
       
       // Set request ID
       request.id = id;
+      request.requestId = id;
       
       // Add request ID to response headers
       const response = context.switchToHttp().getResponse();

@@ -11,6 +11,7 @@ export class RequestIdMiddleware implements NestMiddleware {
     
     // Set request ID in request object
     req.id = id;
+    req.requestId = id;
     
     // Set request ID in response headers
     res.setHeader('X-Request-ID', id);

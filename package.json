@@ -11,7 +11,7 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "node dist/src/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -24,7 +24,8 @@
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:setup": "npm run prisma:migrate:dev && npm run prisma:seed",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "deploy": "npm run build && npm run start:prod"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^2.0.2",

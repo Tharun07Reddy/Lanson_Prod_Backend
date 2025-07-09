@@ -37,6 +37,7 @@ enum AuthProvider {
   FACEBOOK
   APPLE
   TWITTER
+  INBUILT
 }
 
 // Email log model
@@ -119,8 +120,13 @@ model User {
   sessions      UserSession[]
   roles         UserRole[]
   refreshTokens RefreshToken[]
-
-  AuthEvent AuthEvent[]
+  AuthEvent     AuthEvent[]
+  
+  // Analytics relations
+  analyticsEvents AnalyticsEvent[]
+  userPreferences UserPreference[]
+  pageViews       PageView[]
+  featureUsage    FeatureUsage[]
 }
 
 // Role model
@@ -238,4 +244,101 @@ model AuthEvent {
 
   // Optional relation to user
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+// =================== ANALYTICS MODELS ===================
+
+// Analytics Event model for tracking all types of events
+model AnalyticsEvent {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  eventType   String    // Type of event (e.g., "page_view", "button_click", "form_submit")
+  userId      String?   @db.ObjectId // Optional user ID if the event is associated with a user
+  sessionId   String?   // Session ID for tracking anonymous users
+  source      String    // Source of the event (e.g., "web", "mobile", "api")
+  ipAddress   String?   // IP address of the user
+  userAgent   String?   // User agent string
+  metadata    Json?     // Additional metadata about the event
+  timestamp   DateTime  @default(now()) // When the event occurred
+  createdAt   DateTime  @default(now()) // When the event was recorded
+
+  // Relations
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+// User Preference model for storing user preferences
+model UserPreference {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  key       String   // Preference key
+  value     Json     // Preference value (can be any JSON value)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, key])
+}
+
+// Page View model for tracking page views
+model PageView {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String?  @db.ObjectId
+  sessionId   String   // Session ID for tracking anonymous users
+  path        String   // Page path
+  referrer    String?  // Referrer URL
+  duration    Int?     // Time spent on page in seconds
+  entryPage   Boolean  @default(false) // Whether this was the first page in the session
+  exitPage    Boolean  @default(false) // Whether this was the last page in the session
+  ipAddress   String?  // IP address of the user
+  userAgent   String?  // User agent string
+  deviceInfo  Json?    // Device information
+  timestamp   DateTime @default(now())
+
+  // Relations
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+// Feature Usage model for tracking feature usage
+model FeatureUsage {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String   @db.ObjectId
+  featureName     String   // Name of the feature
+  interactionType String   // Type of interaction (e.g., "view", "click", "complete")
+  count           Int      @default(1) // Number of times the feature was used
+  metadata        Json?    // Additional metadata
+  firstUsedAt     DateTime @default(now())
+  lastUsedAt      DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, featureName, interactionType])
+}
+
+// Performance Metric model for tracking performance metrics
+model PerformanceMetric {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  metricType String   // Type of metric (e.g., "response_time", "memory_usage", "cpu_usage")
+  value      Float    // Metric value
+  path       String?  // API path or page path if applicable
+  method     String?  // HTTP method if applicable
+  statusCode Int?     // HTTP status code if applicable
+  metadata   Json?    // Additional metadata
+  timestamp  DateTime @default(now())
+}
+
+// System Health model for tracking system health
+model SystemHealth {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  serviceName  String   // Name of the service
+  status       String   // Status of the service (e.g., "healthy", "degraded", "down")
+  responseTime Float?   // Response time in milliseconds
+  memoryUsage  Float?   // Memory usage in MB
+  cpuUsage     Float?   // CPU usage percentage
+  diskUsage    Float?   // Disk usage percentage
+  metadata     Json?    // Additional metadata
+  timestamp    DateTime @default(now())
 }

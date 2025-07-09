@@ -13,6 +13,7 @@ import { LoggingModule } from './logging/logging.module';
 import { validateEnv } from './config/env.config';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 import authConfig from './config/auth.config';
 
 @Module({
@@ -38,6 +39,8 @@ import authConfig from './config/auth.config';
     // Auth and User modules
     UserModule,
     AuthModule,
+    // Analytics module
+    AnalyticsModule,
     // Health check module
     HealthModule,
   ],

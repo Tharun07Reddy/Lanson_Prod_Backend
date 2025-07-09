@@ -34,11 +34,15 @@ export class LoggingInterceptor implements NestInterceptor {
     const body = request.body as unknown;
     const params = request.params;
     const query = request.query;
-    
-    const requestId = request.requestId || "unknown";
+
+    // Safely extract requestId if present (e.g., set by middleware), else "unknown"
+    const requestId =
+      typeof (request as any).requestId === "string"
+        ? (request as any).requestId
+        : "unknown";
     const userAgent = request.headers["user-agent"] || "unknown";
     const contentLength = request.headers["content-length"] || 0;
-    
+
     const startTime = Date.now();
     
     // Log request

@@ -13,6 +13,7 @@ interface RequestWithUser extends Request {
     email?: string;
     [key: string]: any;
   };
+  analyticsId?: string;
 }
 
 @Injectable()
@@ -53,7 +54,7 @@ export class AnalyticsMiddleware implements NestMiddleware {
       const analyticsId = this.getOrCreateAnalyticsId(req, res);
       
       // Add analytics ID to request for use in controllers
-      req['analyticsId'] = analyticsId;
+      req.analyticsId = analyticsId;
       
       // Track user session if authenticated
       const userId = req.user?.id || req.user?.sub;

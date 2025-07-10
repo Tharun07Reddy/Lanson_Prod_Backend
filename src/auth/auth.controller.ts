@@ -7,17 +7,11 @@ import { RegisterDto, LoginDto, RefreshTokenDto, LoginResponseDto, UserResponseD
 import { UserSession } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 
-interface RequestWithUser extends Request {
-  user: {
-    sub: string;
-    email: string;
-    username?: string;
-  };
-  deviceInfo?: {
-    deviceType?: string;
-    userAgent?: string;
-    ipAddress?: string;
-  };
+// Define the user type for type assertions
+interface JwtUser {
+  sub: string;
+  email: string;
+  username?: string;
 }
 
 @Controller('auth')
@@ -63,7 +57,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async login(
     @Body() loginDto: LoginDto, 
-    @Req() req: RequestWithUser,
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response
   ): Promise<LoginResponseDto> {
     // Extract IP and user agent from request
@@ -136,11 +130,13 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
   async logoutAll(
-    @Req() req: RequestWithUser, 
+    @Req() req: Request, 
     @Res({ passthrough: true }) res: Response,
     @Body() refreshTokenDto?: RefreshTokenDto
   ): Promise<{ success: boolean }> {
-    const userId = req.user.sub;
+    // Type assertion for user
+    const user = req.user as JwtUser;
+    const userId = user.sub;
     const refreshToken = refreshTokenDto?.refreshToken;
     
     const success = await this.authService.logoutAll(userId, refreshToken);
@@ -156,8 +152,10 @@ export class AuthController {
 
   @Get('sessions')
   @UseGuards(JwtAuthGuard)
-  async getSessions(@Req() req: RequestWithUser): Promise<UserSession[]> {
-    const userId = req.user.sub;
+  async getSessions(@Req() req: Request): Promise<UserSession[]> {
+    // Type assertion for user
+    const user = req.user as JwtUser;
+    const userId = user.sub;
     return this.authService.getActiveSessions(userId);
   }
 } 

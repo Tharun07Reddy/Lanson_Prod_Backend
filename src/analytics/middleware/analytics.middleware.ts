@@ -7,15 +7,12 @@ import { ConfigService } from '@nestjs/config';
 import { UAParser } from 'ua-parser-js';
 import * as cookieParser from 'cookie-parser';
 
-// Define the request with user interface
-interface RequestWithUser extends Request {
-  user?: {
-    id?: string;
-    sub?: string;
-    email?: string;
-    [key: string]: any;
-  };
-  analyticsId?: string;
+// Define user type for type assertion
+interface User {
+  id?: string;
+  sub?: string;
+  email?: string;
+  [key: string]: any;
 }
 
 @Injectable()
@@ -41,7 +38,7 @@ export class AnalyticsMiddleware implements NestMiddleware {
     };
   }
 
-  use(req: RequestWithUser, res: Response, next: NextFunction): void {
+  use(req: Request, res: Response, next: NextFunction): void {
     if (!this.analyticsEnabled) {
       return next();
     }
@@ -59,7 +56,8 @@ export class AnalyticsMiddleware implements NestMiddleware {
       req.analyticsId = analyticsId;
       
       // Track user session if authenticated
-      const userId = req.user?.id || req.user?.sub;
+      const user = req.user as User | undefined;
+      const userId = user?.id || user?.sub;
       if (userId) {
         const deviceInfo = this.getDeviceInfo(req);
         

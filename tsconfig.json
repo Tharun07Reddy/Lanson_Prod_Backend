@@ -21,6 +21,8 @@
     "strict": false,
     "noUncheckedIndexedAccess": false,
     "useUnknownInCatchVariables": false,
-    "noPropertyAccessFromIndexSignature": false
-  }
+    "noPropertyAccessFromIndexSignature": false,
+    "typeRoots": ["./node_modules/@types", "./src/common/types"]
+  },
+  "include": ["src/**/*"]
 }

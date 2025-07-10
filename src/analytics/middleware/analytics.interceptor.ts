@@ -7,16 +7,12 @@ import { EventTrackingService } from '../services/event-tracking.service';
 import { PerformanceAnalyticsService } from '../services/performance-analytics.service';
 import { Request, Response } from 'express';
 
-// Define the request with user interface - properly extending Request
-interface RequestWithUser extends Request {
-  user?: {
-    id?: string;
-    sub?: string;
-    email?: string;
-    [key: string]: any;
-  };
-  requestId?: string;
-  sessionId?: string;
+// Define user type for type assertion
+interface User {
+  id?: string;
+  sub?: string;
+  email?: string;
+  [key: string]: any;
 }
 
 @Injectable()
@@ -31,7 +27,7 @@ export class AnalyticsInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     // Skip analytics for OPTIONS requests
     if (context.getType() === 'http') {
-      const request = context.switchToHttp().getRequest<RequestWithUser>();
+      const request = context.switchToHttp().getRequest<Request>();
       if (request.method === 'OPTIONS') {
         return next.handle();
       }
@@ -41,15 +37,16 @@ export class AnalyticsInterceptor implements NestInterceptor {
     const requestId = this.generateRequestId();
     
     if (context.getType() === 'http') {
-      const request = context.switchToHttp().getRequest<RequestWithUser>();
+      const request = context.switchToHttp().getRequest<Request>();
       const { method, path, url, headers } = request;
       
       // Add request ID to request object for tracking
       request['requestId'] = requestId;
       
       // Extract user info if available
-      const userId = request.user?.id || request.user?.sub;
-        const sessionId = request.cookies?.sessionId || headers['session-id'];
+      const user = request.user as User | undefined;
+      const userId = user?.id || user?.sub;
+      const sessionId = request.cookies?.sessionId || headers['session-id'];
       
       // Log request start
       this.logger.debug(`[${requestId}] ${method} ${url} - Started`);

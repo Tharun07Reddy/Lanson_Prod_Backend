@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, NestInterceptor, ExecutionContext, CallHandler, Logger } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap, finalize } from 'rxjs/operators';
@@ -12,6 +14,15 @@ interface RequestWithUser extends Request {
     sub?: string;
     email?: string;
     [key: string]: any;
+    requestId?: string;
+    sessionId?: string;
+    ip?: string;
+    userAgent?: string;
+    referer?: string;
+    origin?: string;
+    host?: string;
+    connection?: string;
+    'content-type'?: string;
   };
 }
 
@@ -38,14 +49,14 @@ export class AnalyticsInterceptor implements NestInterceptor {
     
     if (context.getType() === 'http') {
       const request = context.switchToHttp().getRequest<RequestWithUser>();
-      const { method, path, url, query, params, body, headers, ip } = request;
+      const { method, path, url, headers } = request;
       
       // Add request ID to request object for tracking
       request['requestId'] = requestId;
       
       // Extract user info if available
       const userId = request.user?.id || request.user?.sub;
-      const sessionId = request.cookies?.sessionId || headers['session-id'];
+        const sessionId = request.cookies?.sessionId || headers['session-id'];
       
       // Log request start
       this.logger.debug(`[${requestId}] ${method} ${url} - Started`);

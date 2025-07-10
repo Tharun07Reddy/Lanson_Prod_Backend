@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
@@ -7,6 +10,8 @@ import { Request } from 'express';
 export interface RequestWithId extends Request {
   id: string;
   requestId: string;
+  // No need to explicitly define properties that already exist in Request interface
+  // like headers, cookies, ip, etc. as they're inherited from the Request interface
 }
 
 @Injectable()

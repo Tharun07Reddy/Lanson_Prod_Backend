@@ -17,6 +17,13 @@ interface RequestWithUser extends Request {
     deviceType?: string;
     userAgent?: string;
     ipAddress?: string;
+    cookies?: any;
+    ip?: string;
+    referer?: string;
+    origin?: string;
+    host?: string;
+    connection?: string;
+    'content-type'?: string;
   };
 }
 

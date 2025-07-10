@@ -7,23 +7,16 @@ import { EventTrackingService } from '../services/event-tracking.service';
 import { PerformanceAnalyticsService } from '../services/performance-analytics.service';
 import { Request, Response } from 'express';
 
-// Define the request with user interface
+// Define the request with user interface - properly extending Request
 interface RequestWithUser extends Request {
   user?: {
     id?: string;
     sub?: string;
     email?: string;
     [key: string]: any;
-    requestId?: string;
-    sessionId?: string;
-    ip?: string;
-    userAgent?: string;
-    referer?: string;
-    origin?: string;
-    host?: string;
-    connection?: string;
-    'content-type'?: string;
   };
+  requestId?: string;
+  sessionId?: string;
 }
 
 @Injectable()

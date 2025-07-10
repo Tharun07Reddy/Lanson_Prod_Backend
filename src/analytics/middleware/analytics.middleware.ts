@@ -15,9 +15,8 @@ interface RequestWithUser extends Request {
     email?: string;
     [key: string]: any;
   };
-    [key: string]: any;
-  };
-  
+  analyticsId?: string;
+}
 
 @Injectable()
 export class AnalyticsMiddleware implements NestMiddleware {

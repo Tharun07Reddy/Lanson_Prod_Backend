@@ -6,12 +6,10 @@ import { Observable } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { Request } from 'express';
 
-// Instead of augmenting express, define a custom interface
+// Extend the Express Request interface
 export interface RequestWithId extends Request {
   id: string;
   requestId: string;
-  // No need to explicitly define properties that already exist in Request interface
-  // like headers, cookies, ip, etc. as they're inherited from the Request interface
 }
 
 @Injectable()

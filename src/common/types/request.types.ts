@@ -1,3 +1,4 @@
+// Import Express types
 import { Request } from 'express';
 
 // For backward compatibility
@@ -20,6 +21,7 @@ export interface RequestWithUser extends Request {
   };
 }
 
+// User type for JWT authentication
 export interface JwtUser {
   sub: string;
   email: string;

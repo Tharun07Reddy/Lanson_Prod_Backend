@@ -6,14 +6,7 @@ import { tap, finalize } from 'rxjs/operators';
 import { EventTrackingService } from '../services/event-tracking.service';
 import { PerformanceAnalyticsService } from '../services/performance-analytics.service';
 import { Request, Response } from 'express';
-
-// Define user type for type assertion
-interface User {
-  id?: string;
-  sub?: string;
-  email?: string;
-  [key: string]: any;
-}
+import { JwtUser } from '../../common/types/request.types';
 
 @Injectable()
 export class AnalyticsInterceptor implements NestInterceptor {
@@ -44,7 +37,7 @@ export class AnalyticsInterceptor implements NestInterceptor {
       request['requestId'] = requestId;
       
       // Extract user info if available
-      const user = request.user as User | undefined;
+      const user = request.user as JwtUser | undefined;
       const userId = user?.id || user?.sub;
       const sessionId = request.cookies?.sessionId || headers['session-id'];
       

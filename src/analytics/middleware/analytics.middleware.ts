@@ -6,14 +6,7 @@ import { UserAnalyticsService } from '../services/user-analytics.service';
 import { ConfigService } from '@nestjs/config';
 import { UAParser } from 'ua-parser-js';
 import * as cookieParser from 'cookie-parser';
-
-// Define user type for type assertion
-interface User {
-  id?: string;
-  sub?: string;
-  email?: string;
-  [key: string]: any;
-}
+import { JwtUser } from '../../common/types/request.types';
 
 @Injectable()
 export class AnalyticsMiddleware implements NestMiddleware {
@@ -56,7 +49,7 @@ export class AnalyticsMiddleware implements NestMiddleware {
       req.analyticsId = analyticsId;
       
       // Track user session if authenticated
-      const user = req.user as User | undefined;
+      const user = req.user as JwtUser | undefined;
       const userId = user?.id || user?.sub;
       if (userId) {
         const deviceInfo = this.getDeviceInfo(req);

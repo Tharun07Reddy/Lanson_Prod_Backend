@@ -6,13 +6,7 @@ import { Public } from './decorators/public.decorator';
 import { RegisterDto, LoginDto, RefreshTokenDto, LoginResponseDto, UserResponseDto } from './dto/auth.dto';
 import { UserSession } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
-
-// Define the user type for type assertions
-interface JwtUser {
-  sub: string;
-  email: string;
-  username?: string;
-}
+import { JwtUser } from '../common/types/request.types';
 
 @Controller('auth')
 export class AuthController {
